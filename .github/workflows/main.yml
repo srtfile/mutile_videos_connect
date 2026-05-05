@@ -1,0 +1,50 @@
+name: Google Drive Video Merge (Gdown)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ───────── Checkout ─────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ───────── Setup Python ─────────
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # ───────── Install system tools ─────────
+      - name: Install FFmpeg
+        run: |
+          sudo apt update
+          sudo apt install -y ffmpeg
+
+      # ───────── Install Python deps ─────────
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install gdown tqdm
+
+      # ───────── Download Google Drive folder ─────────
+      - name: Download videos from Drive
+        run: |
+          mkdir videos
+          gdown --folder "https://drive.google.com/drive/folders/1FVA-We0kaYWjl67UTPQT3wD4OGjTCP3G?usp=sharing" -O videos
+
+      # ───────── Run your script ─────────
+      - name: Merge videos
+        run: python join_videos.py
+
+      # ───────── Upload output ─────────
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: merged-video
+          path: |
+            merged_output_valentina_nappi.mp4
+            timestamps.txt
